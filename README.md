@@ -1,7 +1,6 @@
 # orbaxport
-
-[![PyPI](https://img.shields.io/pypi/v/orbaxport.svg)](https://pypi.org/project/orbaxport/)
-[![Python](https://img.shields.io/pypi/pyversions/orbaxport.svg)](https://pypi.org/project/orbaxport/)
+![PyPI](https://img.shields.io/pypi/v/orbaxport?cacheSeconds=60)
+[![PyPI version](https://badge.fury.io/py/orbaxport.svg)](https://badge.fury.io/py/orbaxport)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 Convert **Orbax / Tunix (JAX)** training checkpoints — including those saved with **TPU multi-sharding** — into:
