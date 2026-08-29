@@ -1,0 +1,31 @@
+diff --git a/src/orbaxport/convert.py b/src/orbaxport/convert.py
+index f28fa81..eaf4641 100644
+--- a/src/orbaxport/convert.py
++++ b/src/orbaxport/convert.py
+@@ -192,10 +192,25 @@ def _to_numpy(x):
+     return np.asarray(x)
+ 
+ def _flatten_heads(x):
++    """Flatten a per-head Q/K/V slice sliced out of a fused qkv/kv einsum kernel
++    into a 2D (num_heads * head_dim, hidden_in) matrix suitable for nn.Linear.
++
++    Slices taken from a fused qkv_einsum/kv_einsum kernel follow the Gemma/Flax
++    einsum convention: shape (num_heads, hidden_in, head_dim) -- i.e. head_dim is
++    always the LAST axis. Because num_heads and head_dim are not adjacent axes,
++    a transpose is required before merging them; a plain .reshape() silently
++    scrambles values while keeping the output shape "correct-looking".
++
++    This intentionally no longer guesses the axis order by comparing
++    shape[1] vs shape[2] (the previous heuristic), which produced wrong-but-
++    same-shape tensors whenever hidden_in was numerically larger than head_dim
++    (the common case).
++    """
+     if x.ndim == 2:
+         return x
+     if x.ndim == 3:
+-        return x.reshape(x.shape[0] * x.shape[1], x.shape[2]) if x.shape[1] <= x.shape[2] else x.reshape(x.shape[0] * x.shape[2], x.shape[1])
++        num_heads, hidden_in, head_dim = x.shape
++        return np.ascontiguousarray(x.transpose(0, 2, 1)).reshape(num_heads * head_dim, hidden_in)
+     return x.reshape(x.shape[0], -1)
+ 
+ def _split_fused(state, split_qkv=True, verbose=False):
